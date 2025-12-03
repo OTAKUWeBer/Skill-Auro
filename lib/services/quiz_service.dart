@@ -1,10 +1,19 @@
 import 'dart:convert';
 import 'dart:math';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/quiz_models.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'dart:async';
 
+class QuizException implements Exception {
+  final String message;
+  QuizException(this.message);
+
+  @override
+  String toString() => message;
+}
 
 class QuizService {
   final apiKey = dotenv.env['QUIZ_API_KEY'];
@@ -112,19 +121,31 @@ class QuizService {
     final category = mode == QuizMode.linux ? "Linux" : "BASH";
     final tag = mode == QuizMode.linux ? "category=$category" : "tags=$category";
 
-    final url = Uri.parse(
-      'https://quizapi.io/api/v1/questions?apiKey=$apiKey&$tag&limit=$limit&difficulty=$difficultyParam',
-    );
+    final baseUrl = 'https://quizapi.io/api/v1/questions';
+    final queryParams = 'apiKey=$apiKey&$tag&limit=$limit&difficulty=$difficultyParam';
+    final url = Uri.parse('$baseUrl?$queryParams');
 
-    final response = await http.get(url).timeout(const Duration(seconds: 10));
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 10));
 
-    if (response.statusCode == 200) {
-      final jsonList = jsonDecode(response.body) as List;
-      return jsonList.map((q) => QuizQuestion.fromJson(q)).toList();
-    } else if (response.statusCode == 429) {
-      throw Exception("Rate limited. Please try again later.");
-    } else {
-      throw Exception("Failed to load quiz: ${response.statusCode}");
+      if (response.statusCode == 200) {
+        final jsonList = jsonDecode(response.body) as List;
+        return jsonList.map((q) => QuizQuestion.fromJson(q)).toList();
+      } else if (response.statusCode == 429) {
+        throw QuizException("Rate limited. Please try again later.");
+      } else {
+        throw QuizException("Failed to load quiz: HTTP ${response.statusCode}");
+      }
+    } catch (e) {
+      if (e is QuizException) {
+        rethrow;
+      } else if (e is SocketException) {
+        throw QuizException("Network error: Unable to connect. Please check your internet connection.");
+      } else if (e is TimeoutException) {
+        throw QuizException("Request timed out. Please try again.");
+      } else {
+        throw QuizException("Unable to load quiz. Please try again later.");
+      }
     }
   }
 

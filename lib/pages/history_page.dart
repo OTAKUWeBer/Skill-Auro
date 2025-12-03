@@ -68,7 +68,29 @@ class _HistoryPageState extends State<HistoryPage> {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text("Unable to load history"),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _historyFuture = statsService.getHistory();
+                      });
+                    },
+                    child: const Text("Retry"),
+                  ),
+                ],
+              ),
+            );
           }
 
           final history = snapshot.data ?? [];

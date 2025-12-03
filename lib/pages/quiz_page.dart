@@ -62,8 +62,11 @@ class _QuizPageState extends State<QuizPage> {
     } catch (e) {
       setState(() => loading = false);
       if (mounted) {
+        final errorMessage = e is QuizException 
+            ? e.toString() 
+            : "Failed to load quiz. Please try again.";
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
+          SnackBar(content: Text(errorMessage)),
         );
       }
     }
