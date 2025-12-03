@@ -45,7 +45,10 @@ class _QuizAppState extends State<QuizApp> {
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
       themeMode: _themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: HomePage(themeService: _themeService),
+      home: ListenableBuilder(
+        listenable: _themeService,
+        builder: (context, _) => HomePage(themeService: _themeService),
+      ),
     );
   }
 

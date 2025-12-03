@@ -5,10 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/quiz_models.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+
 class QuizService {
   final apiKey = dotenv.env['QUIZ_API_KEY'];
   static const String _cachePrefix = 'quiz_cache_';
   static const int _cacheExpirationHours = 24;
+  final _random = Random();
 
   Future<List<QuizQuestion>> fetchQuiz({
     required QuizMode mode,
@@ -20,17 +22,80 @@ class QuizService {
     // Try to get cached data first
     final cached = await _getCachedQuestions(cacheKey);
     if (cached.isNotEmpty) {
-      return cached;
+      return _shuffleQuestions(cached);
     }
 
     // Fetch from API if not cached
     try {
       final questions = await _fetchFromAPI(mode, limit, difficulty);
       await _cacheQuestions(cacheKey, questions);
-      return questions;
+      return _shuffleQuestions(questions);
     } catch (e) {
       rethrow;
     }
+  }
+
+  List<QuizQuestion> _shuffleQuestions(List<QuizQuestion> questions) {
+    // Shuffle the list of questions
+    final shuffledQuestions = List<QuizQuestion>.from(questions)..shuffle(_random);
+    
+    // Shuffle answer options for each question
+    return shuffledQuestions.map((q) => _shuffleAnswers(q)).toList();
+  }
+
+  QuizQuestion _shuffleAnswers(QuizQuestion question) {
+    // Get all answer entries
+    final answerEntries = question.answers.entries.toList();
+    
+    // Create a list of non-null answers with their keys
+    final validAnswers = answerEntries
+        .where((e) => e.value != null && e.value!.isNotEmpty)
+        .toList();
+    
+    if (validAnswers.isEmpty) return question;
+    
+    // Shuffle the valid answers
+    validAnswers.shuffle(_random);
+    
+    // Create new answers map with shuffled order
+    final newAnswers = <String, String?>{};
+    final keys = ['answer_a', 'answer_b', 'answer_c', 'answer_d', 'answer_e', 'answer_f'];
+    
+    for (int i = 0; i < validAnswers.length && i < keys.length; i++) {
+      newAnswers[keys[i]] = validAnswers[i].value;
+    }
+    
+    // Fill remaining slots with null
+    for (int i = validAnswers.length; i < keys.length; i++) {
+      newAnswers[keys[i]] = null;
+    }
+    
+    // Create mapping from old keys to new keys
+    final keyMapping = <String, String>{};
+    for (int i = 0; i < validAnswers.length; i++) {
+      keyMapping[validAnswers[i].key] = keys[i];
+    }
+    
+    // Update correct answers with new keys
+    final newCorrectAnswers = <String, String>{};
+    question.correctAnswers.forEach((key, value) {
+      final baseKey = key.replaceAll('_correct', '');
+      final newKey = keyMapping[baseKey];
+      if (newKey != null) {
+        newCorrectAnswers['${newKey}_correct'] = value;
+      } else {
+        newCorrectAnswers[key] = value;
+      }
+    });
+    
+    return QuizQuestion(
+      id: question.id,
+      question: question.question,
+      answers: newAnswers,
+      correctAnswers: newCorrectAnswers,
+      category: question.category,
+      difficulty: question.difficulty,
+    );
   }
 
   Future<List<QuizQuestion>> _fetchFromAPI(
@@ -55,14 +120,7 @@ class QuizService {
 
     if (response.statusCode == 200) {
       final jsonList = jsonDecode(response.body) as List;
-      var questions = jsonList.map((q) => QuizQuestion.fromJson(q)).toList();
-      
-      questions.shuffle(Random());
-      for (var question in questions) {
-        _shuffleAnswers(question);
-      }
-      
-      return questions;
+      return jsonList.map((q) => QuizQuestion.fromJson(q)).toList();
     } else if (response.statusCode == 429) {
       throw Exception("Rate limited. Please try again later.");
     } else {
@@ -116,41 +174,6 @@ class QuizService {
 
   String _generateCacheKey(QuizMode mode, int limit, Difficulty difficulty) {
     return '$_cachePrefix${mode.name}_${limit}_${difficulty.name}';
-  }
-
-  void _shuffleAnswers(QuizQuestion question) {
-    // Create a list of answer entries with their keys
-    final answerEntries = question.answers.entries
-        .where((e) => e.value != null)
-        .toList();
-
-    // Shuffle the entries
-    answerEntries.shuffle(Random());
-
-    // Create a mapping from old keys to new keys
-    final keyMapping = <String, String>{};
-    final newAnswers = <String, String?>{};
-    final newCorrectAnswers = <String, String>{};
-
-    final oldKeys = ['a', 'b', 'c', 'd'];
-    for (int i = 0; i < answerEntries.length; i++) {
-      final oldKey = answerEntries[i].key;
-      final newKey = oldKeys[i];
-      
-      keyMapping[oldKey] = newKey;
-      newAnswers[newKey] = answerEntries[i].value;
-      
-      // Update correct answers mapping
-      if (question.correctAnswers["${oldKey}_correct"] == "true") {
-        newCorrectAnswers["${newKey}_correct"] = "true";
-      }
-    }
-
-    // Update the question object
-    question.answers.clear();
-    question.answers.addAll(newAnswers);
-    question.correctAnswers.clear();
-    question.correctAnswers.addAll(newCorrectAnswers);
   }
 }
 
