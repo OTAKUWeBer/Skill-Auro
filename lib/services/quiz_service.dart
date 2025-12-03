@@ -1,9 +1,9 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/quiz_models.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 
 class QuizService {
   final apiKey = dotenv.env['QUIZ_API_KEY'];
@@ -55,7 +55,14 @@ class QuizService {
 
     if (response.statusCode == 200) {
       final jsonList = jsonDecode(response.body) as List;
-      return jsonList.map((q) => QuizQuestion.fromJson(q)).toList();
+      var questions = jsonList.map((q) => QuizQuestion.fromJson(q)).toList();
+      
+      questions.shuffle(Random());
+      for (var question in questions) {
+        _shuffleAnswers(question);
+      }
+      
+      return questions;
     } else if (response.statusCode == 429) {
       throw Exception("Rate limited. Please try again later.");
     } else {
@@ -109,6 +116,41 @@ class QuizService {
 
   String _generateCacheKey(QuizMode mode, int limit, Difficulty difficulty) {
     return '$_cachePrefix${mode.name}_${limit}_${difficulty.name}';
+  }
+
+  void _shuffleAnswers(QuizQuestion question) {
+    // Create a list of answer entries with their keys
+    final answerEntries = question.answers.entries
+        .where((e) => e.value != null)
+        .toList();
+
+    // Shuffle the entries
+    answerEntries.shuffle(Random());
+
+    // Create a mapping from old keys to new keys
+    final keyMapping = <String, String>{};
+    final newAnswers = <String, String?>{};
+    final newCorrectAnswers = <String, String>{};
+
+    final oldKeys = ['a', 'b', 'c', 'd'];
+    for (int i = 0; i < answerEntries.length; i++) {
+      final oldKey = answerEntries[i].key;
+      final newKey = oldKeys[i];
+      
+      keyMapping[oldKey] = newKey;
+      newAnswers[newKey] = answerEntries[i].value;
+      
+      // Update correct answers mapping
+      if (question.correctAnswers["${oldKey}_correct"] == "true") {
+        newCorrectAnswers["${newKey}_correct"] = "true";
+      }
+    }
+
+    // Update the question object
+    question.answers.clear();
+    question.answers.addAll(newAnswers);
+    question.correctAnswers.clear();
+    question.correctAnswers.addAll(newCorrectAnswers);
   }
 }
 
