@@ -1,0 +1,152 @@
+import 'package:flutter/material.dart';
+import '../models/quiz_models.dart';
+import '../services/theme_service.dart';
+import 'quiz_config_page.dart';
+import 'history_page.dart';
+import 'stats_page.dart';
+
+class HomePage extends StatelessWidget {
+  final ThemeService themeService;
+
+  const HomePage({super.key, required this.themeService});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Skill Auro"),
+        actions: [
+          IconButton(
+            icon: Icon(
+              themeService.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+            ),
+            onPressed: () => themeService.toggleTheme(),
+            tooltip: 'Toggle Theme',
+          ),
+          IconButton(
+            icon: const Icon(Icons.bar_chart),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const StatsPage()),
+              );
+            },
+            tooltip: 'Statistics',
+          ),
+          IconButton(
+            icon: const Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const HistoryPage()),
+              );
+            },
+            tooltip: 'Quiz History',
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Icon(
+                      Icons.quiz,
+                      size: 64,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Choose Your Challenge",
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Select a quiz category to begin",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            _buildQuizCard(
+              context,
+              title: "Linux Quiz",
+              icon: Icons.computer,
+              color: Colors.orange,
+              mode: QuizMode.linux,
+            ),
+            const SizedBox(height: 16),
+            _buildQuizCard(
+              context,
+              title: "Bash Quiz",
+              icon: Icons.terminal,
+              color: Colors.green,
+              mode: QuizMode.bash,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuizCard(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required Color color,
+    required QuizMode mode,
+  }) {
+    return Card(
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => QuizConfigPage(title: title, mode: mode),
+            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 32, color: color),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
