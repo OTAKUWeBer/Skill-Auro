@@ -19,10 +19,47 @@ class _HistoryPageState extends State<HistoryPage> {
     _historyFuture = statsService.getHistory();
   }
 
+  void _showClearHistoryDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Clear History"),
+        content: const Text("Are you sure you want to delete all quiz history? This action cannot be undone."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              await statsService.clearHistory();
+              if (mounted) {
+                Navigator.pop(context);
+                setState(() {
+                  _historyFuture = statsService.getHistory();
+                });
+              }
+            },
+            child: const Text("Clear", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Quiz History")),
+      appBar: AppBar(
+        title: const Text("Quiz History"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: _showClearHistoryDialog,
+            tooltip: 'Clear History',
+          ),
+        ],
+      ),
       body: FutureBuilder<List<QuizStats>>(
         future: _historyFuture,
         builder: (context, snapshot) {

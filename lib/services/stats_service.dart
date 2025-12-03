@@ -105,4 +105,9 @@ class StatsService {
       'totalTimeMinutes': (totalTime / 60).round(),
     };
   }
+
+  Future<void> clearHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_historyKey);
+  }
 }

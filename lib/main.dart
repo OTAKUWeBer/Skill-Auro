@@ -25,7 +25,9 @@ class _QuizAppState extends State<QuizApp> {
   void initState() {
     super.initState();
     _themeService = ThemeService();
-    _themeService.addListener(() => setState(() {}));
+    _themeService.addListener(() {
+      setState(() {});
+    });
     _themeService.loadTheme();
   }
 
