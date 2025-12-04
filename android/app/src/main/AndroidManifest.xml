@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Added INTERNET permission for release build to enable API calls -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    
     <application
         android:label="Skill Auro"
         android:name="${applicationName}"
