@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="55" fill="none" stroke="#0066CC" stroke-width="2"/>
+  
+  <!-- Overlapping circles representing DevOps cycle -->
+  <circle cx="45" cy="55" r="18" fill="none" stroke="#0066CC" stroke-width="2"/>
+  <circle cx="75" cy="55" r="18" fill="none" stroke="#0066CC" stroke-width="2"/>
+  <circle cx="60" cy="75" r="18" fill="none" stroke="#0066CC" stroke-width="2"/>
+  
+  <!-- Center point -->
+  <circle cx="60" cy="60" r="4" fill="#0066CC"/>
+</svg>

@@ -21,7 +21,7 @@ class QuizConfigPage extends StatefulWidget {
 
 class _QuizConfigPageState extends State<QuizConfigPage> {
   int questionCount = 10;
-  Difficulty difficulty = Difficulty.normal;
+  Difficulty difficulty = Difficulty.medium;
 
   @override
   Widget build(BuildContext context) {
@@ -78,8 +78,8 @@ class _QuizConfigPageState extends State<QuizConfigPage> {
                     ),
                     const SizedBox(height: 12),
                     _buildDifficultyButton(
-                      Difficulty.normal,
-                      "Normal",
+                      Difficulty.medium,
+                      "Medium",
                       Icons.sentiment_neutral,
                       Colors.orange,
                     ),

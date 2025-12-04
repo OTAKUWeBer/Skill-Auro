@@ -1,5 +1,5 @@
-enum QuizMode { linux, bash }
-enum Difficulty { easy, normal, hard }
+enum QuizMode { linux, bash, devops, html, code, react, nextjs, wordpress }
+enum Difficulty { easy, medium, hard }
 
 class QuizQuestion {
   final String id;

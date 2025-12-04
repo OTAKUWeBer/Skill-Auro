@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="55" fill="none" stroke="#E34C26" stroke-width="2"/>
+  
+  <!-- HTML shield shape -->
+  <path d="M 40 35 L 80 35 L 78 85 L 60 92 L 42 85 Z" fill="none" stroke="#E34C26" stroke-width="2"/>
+  
+  <!-- HTML tag brackets -->
+  <text x="60" y="75" font-size="40" font-weight="bold" fill="#E34C26" text-anchor="middle" font-family="Arial">&lt;&gt;</text>
+</svg>

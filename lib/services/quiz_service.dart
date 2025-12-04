@@ -121,12 +121,27 @@ class QuizService {
   ) async {
     String difficultyParam = difficulty == Difficulty.easy
         ? "Easy"
-        : difficulty == Difficulty.normal
+        : difficulty == Difficulty.medium
             ? "Medium"
             : "Hard";
 
-    final category = mode == QuizMode.linux ? "Linux" : "BASH";
-    final tag = mode == QuizMode.linux ? "category=$category" : "tags=$category";
+    final category = mode == QuizMode.linux
+        ? "Linux"
+        : mode == QuizMode.bash
+            ? "Bash"
+        : mode == QuizMode.devops
+            ? "DevOps"
+        : mode == QuizMode.html
+            ? "HTML"
+        : mode == QuizMode.code
+            ? "Code"
+        : mode == QuizMode.react
+            ? "React"
+        : mode == QuizMode.nextjs
+            ? "Next.js"
+        : "WordPress";
+    
+    final tag = "category=$category";
 
     final apiKey = _getApiKey();
     final baseUrl = 'https://quizapi.io/api/v1/questions';

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <!-- Background circle -->
+  <circle cx="60" cy="60" r="55" fill="none" stroke="#21759B" stroke-width="2"/>
+  
+  <!-- WordPress W -->
+  <circle cx="60" cy="60" r="30" fill="none" stroke="#21759B" stroke-width="2"/>
+  <text x="60" y="75" font-size="50" font-weight="bold" fill="#21759B" text-anchor="middle" font-family="Arial">W</text>
+</svg>
