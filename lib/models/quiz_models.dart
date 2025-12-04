@@ -1,4 +1,4 @@
-enum QuizMode { linux, bash, devops, html, code, react, nextjs, wordpress }
+enum QuizMode { linux, bash, devops, html, code, react, nextjs, wordpress, computerscience }
 enum Difficulty { easy, medium, hard }
 
 class QuizQuestion {

@@ -97,6 +97,14 @@ class HomePage extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            _buildQuizCard(
+              context,
+              title: "Computer Science Quiz",
+              icon: Icons.computer,
+              color: Colors.teal,
+              mode: QuizMode.computerscience,
+            ),
             const SizedBox(height: 24),
             _buildQuizCard(
               context,

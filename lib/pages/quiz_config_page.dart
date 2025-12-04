@@ -49,7 +49,15 @@ class _QuizConfigPageState extends State<QuizConfigPage> {
                       children: [
                         Expanded(child: _buildCountButton(10)),
                         const SizedBox(width: 12),
-                        Expanded(child: _buildCountButton(20)),
+                        Expanded(child: _buildCountButton(25)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(child: _buildCountButton(30)),
+                        const SizedBox(width: 12),
+                        Expanded(child: _buildCountButton(50)),
                       ],
                     ),
                   ],

@@ -119,6 +119,10 @@ class QuizService {
     int limit,
     Difficulty difficulty,
   ) async {
+    if (mode == QuizMode.computerscience) {
+      return _fetchFromOpenTDB(limit, difficulty);
+    }
+
     String difficultyParam = difficulty == Difficulty.easy
         ? "Easy"
         : difficulty == Difficulty.medium
@@ -170,6 +174,95 @@ class QuizService {
         throw QuizException("Unable to load quiz. Please try again later.");
       }
     }
+  }
+
+  Future<List<QuizQuestion>> _fetchFromOpenTDB(
+    int limit,
+    Difficulty difficulty,
+  ) async {
+    String difficultyParam = difficulty == Difficulty.easy
+        ? "easy"
+        : difficulty == Difficulty.medium
+            ? "medium"
+            : "hard";
+
+    final url = Uri.parse(
+      'https://opentdb.com/api.php?amount=$limit&category=18&difficulty=$difficultyParam'
+    );
+
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body) as Map<String, dynamic>;
+        final results = jsonData['results'] as List;
+        
+        return results.map((q) => _parseOpenTDBQuestion(q)).toList();
+      } else {
+        throw QuizException("Failed to load quiz: HTTP ${response.statusCode}");
+      }
+    } catch (e) {
+      if (e is QuizException) {
+        rethrow;
+      } else if (e is SocketException) {
+        throw QuizException("Network error: Unable to connect. Please check your internet connection.");
+      } else if (e is TimeoutException) {
+        throw QuizException("Request timed out. Please try again.");
+      } else {
+        throw QuizException("Unable to load quiz. Please try again later.");
+      }
+    }
+  }
+
+  QuizQuestion _parseOpenTDBQuestion(Map<String, dynamic> q) {
+    final question = _htmlDecode(q['question'] as String);
+    final correctAnswer = _htmlDecode(q['correct_answer'] as String);
+    final incorrectAnswers = (q['incorrect_answers'] as List)
+        .map((a) => _htmlDecode(a as String))
+        .toList();
+    
+    // Combine all answers
+    final allAnswers = [correctAnswer, ...incorrectAnswers]..shuffle(_random);
+    
+    // Map answers to the standard format (answer_a, answer_b, etc.)
+    final answersMap = <String, String?>{};
+    final correctAnswersMap = <String, String>{};
+    
+    for (int i = 0; i < allAnswers.length && i < 6; i++) {
+      final key = ['answer_a', 'answer_b', 'answer_c', 'answer_d', 'answer_e', 'answer_f'][i];
+      answersMap[key] = allAnswers[i];
+      
+      if (allAnswers[i] == correctAnswer) {
+        correctAnswersMap['${key}_correct'] = 'true';
+      } else {
+        correctAnswersMap['${key}_correct'] = 'false';
+      }
+    }
+    
+    // Fill remaining slots with null
+    for (int i = allAnswers.length; i < 6; i++) {
+      final key = ['answer_a', 'answer_b', 'answer_c', 'answer_d', 'answer_e', 'answer_f'][i];
+      answersMap[key] = null;
+    }
+    
+    return QuizQuestion(
+      id: question.hashCode.toString(),
+      question: question,
+      answers: answersMap,
+      correctAnswers: correctAnswersMap,
+      category: 'Computer Science',
+      difficulty: q['difficulty'] as String,
+    );
+  }
+
+  String _htmlDecode(String text) {
+    return text
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#039;', "'")
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&nbsp;', ' ');
   }
 
   Future<List<QuizQuestion>> _getCachedQuestions(String key) async {
