@@ -16,10 +16,20 @@ class QuizException implements Exception {
 }
 
 class QuizService {
-  final apiKey = dotenv.env['QUIZ_API_KEY'];
+  final _random = Random();
+
   static const String _cachePrefix = 'quiz_cache_';
   static const int _cacheExpirationHours = 24;
-  final _random = Random();
+
+  String _getApiKey() {
+    final key = dotenv.env['QUIZ_API_KEY'];
+    if (key == null || key.isEmpty) {
+      throw QuizException(
+        'API key not configured. Please ensure .env file exists with QUIZ_API_KEY variable.',
+      );
+    }
+    return key;
+  }
 
   Future<List<QuizQuestion>> fetchQuiz({
     required QuizMode mode,
@@ -121,6 +131,7 @@ class QuizService {
     final category = mode == QuizMode.linux ? "Linux" : "BASH";
     final tag = mode == QuizMode.linux ? "category=$category" : "tags=$category";
 
+    final apiKey = _getApiKey();
     final baseUrl = 'https://quizapi.io/api/v1/questions';
     final queryParams = 'apiKey=$apiKey&$tag&limit=$limit&difficulty=$difficultyParam';
     final url = Uri.parse('$baseUrl?$queryParams');
