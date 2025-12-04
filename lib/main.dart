@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'services/theme_service.dart';
+import 'services/api_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: ".env");
-  
-  runApp(const QuizApp());
+  final apiService = ApiService();
+  await apiService.initialize();
+
+  runApp(QuizApp(apiService: apiService));
 }
 
 class QuizApp extends StatefulWidget {
-  const QuizApp({super.key});
+  final ApiService apiService;
+
+  const QuizApp({super.key, required this.apiService});
 
   @override
   State<QuizApp> createState() => _QuizAppState();
@@ -47,7 +50,10 @@ class _QuizAppState extends State<QuizApp> {
       themeMode: _themeService.isDarkMode ? ThemeMode.dark : ThemeMode.light,
       home: ListenableBuilder(
         listenable: _themeService,
-        builder: (context, _) => HomePage(themeService: _themeService),
+        builder: (context, _) => HomePage(
+          themeService: _themeService,
+          apiService: widget.apiService,
+        ),
       ),
     );
   }

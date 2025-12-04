@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/quiz_models.dart';
 import '../services/quiz_service.dart';
 import '../services/stats_service.dart';
+import '../services/api_service.dart';
 import 'result_page.dart';
 
 class QuizPage extends StatefulWidget {
@@ -9,6 +10,7 @@ class QuizPage extends StatefulWidget {
   final QuizMode mode;
   final int questionCount;
   final Difficulty difficulty;
+  final ApiService apiService;
 
   const QuizPage({
     super.key,
@@ -16,6 +18,7 @@ class QuizPage extends StatefulWidget {
     required this.mode,
     required this.questionCount,
     required this.difficulty,
+    required this.apiService,
   });
 
   @override
@@ -23,7 +26,7 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
-  final quizService = QuizService();
+  late final quizService = QuizService(apiService: widget.apiService);
   final statsService = StatsService();
   List<QuizQuestion> questions = [];
   List<QuizAttempt> attempts = [];
@@ -128,6 +131,7 @@ class _QuizPageState extends State<QuizPage> {
             difficulty: widget.difficulty,
             timeSpent: _stopwatch.elapsed.inSeconds,
             attempts: attempts,
+            apiService: widget.apiService,
           ),
         ),
       );

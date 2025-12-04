@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import '../models/quiz_models.dart';
 import '../services/theme_service.dart';
+import '../services/api_service.dart';
 import 'quiz_config_page.dart';
 import 'history_page.dart';
 import 'stats_page.dart';
+import 'settings_page.dart';
 
 class HomePage extends StatelessWidget {
   final ThemeService themeService;
+  final ApiService apiService;
 
-  const HomePage({super.key, required this.themeService});
+  const HomePage({
+    super.key,
+    required this.themeService,
+    required this.apiService,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +49,18 @@ class HomePage extends StatelessWidget {
               );
             },
             tooltip: 'Quiz History',
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SettingsPage(apiService: apiService),
+                ),
+              );
+            },
+            tooltip: 'Settings',
           ),
         ],
       ),
@@ -113,7 +132,11 @@ class HomePage extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => QuizConfigPage(title: title, mode: mode),
+              builder: (_) => QuizConfigPage(
+                title: title,
+                mode: mode,
+                apiService: apiService,
+              ),
             ),
           );
         },

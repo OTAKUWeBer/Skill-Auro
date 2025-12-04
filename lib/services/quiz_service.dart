@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/quiz_models.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'api_service.dart';
 import 'dart:async';
 
 class QuizException implements Exception {
@@ -17,18 +17,15 @@ class QuizException implements Exception {
 
 class QuizService {
   final _random = Random();
+  final ApiService apiService;
 
   static const String _cachePrefix = 'quiz_cache_';
   static const int _cacheExpirationHours = 24;
 
+  QuizService({required this.apiService});
+
   String _getApiKey() {
-    final key = dotenv.env['QUIZ_API_KEY'];
-    if (key == null || key.isEmpty) {
-      throw QuizException(
-        'API key not configured. Please ensure .env file exists with QUIZ_API_KEY variable.',
-      );
-    }
-    return key;
+    return apiService.apiKey;
   }
 
   Future<List<QuizQuestion>> fetchQuiz({

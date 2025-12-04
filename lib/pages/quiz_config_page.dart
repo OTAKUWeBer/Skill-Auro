@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import '../models/quiz_models.dart';
+import '../services/api_service.dart';
 import 'quiz_page.dart';
 
 class QuizConfigPage extends StatefulWidget {
   final String title;
   final QuizMode mode;
+  final ApiService apiService;
 
-  const QuizConfigPage({super.key, required this.title, required this.mode});
+  const QuizConfigPage({
+    super.key,
+    required this.title,
+    required this.mode,
+    required this.apiService,
+  });
 
   @override
   State<QuizConfigPage> createState() => _QuizConfigPageState();
@@ -98,6 +105,7 @@ class _QuizConfigPageState extends State<QuizConfigPage> {
                       mode: widget.mode,
                       questionCount: questionCount,
                       difficulty: difficulty,
+                      apiService: widget.apiService,
                     ),
                   ),
                 );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/quiz_models.dart';
 import 'home_page.dart';
 import '../services/theme_service.dart';
+import '../services/api_service.dart';
 
 class ResultPage extends StatefulWidget {
   final int score;
@@ -10,6 +11,7 @@ class ResultPage extends StatefulWidget {
   final Difficulty difficulty;
   final int timeSpent;
   final List<QuizAttempt> attempts;
+  final ApiService apiService;
 
   const ResultPage({
     super.key,
@@ -19,6 +21,7 @@ class ResultPage extends StatefulWidget {
     required this.difficulty,
     required this.timeSpent,
     required this.attempts,
+    required this.apiService,
   });
 
   @override
@@ -243,7 +246,10 @@ class _ResultPageState extends State<ResultPage> {
               onPressed: () => Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => HomePage(themeService: ThemeService()),
+                  builder: (_) => HomePage(
+                    themeService: ThemeService(),
+                    apiService: widget.apiService,
+                  ),
                 ),
                 (route) => false,
               ),
